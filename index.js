@@ -1,17 +1,21 @@
-const {REST, Routes} = require('discord.js');
+const {Client, GatewayIntentBits} = require('dicsord.js');
 
-const commands = [
-    {
-        name: 'ping',
-        description: 'Replies with Pong!',
-    },
-];
+const client=new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+    ],
+});
 
-const rest = new REST({version: '10'}).setToken(TOKEN);
+client.on('ready', ()=>{
+    console.log('The bot is ready');
+})
 
-(async ()=>{
-    try {
-        console.log('Started refreshing application (/) commands.');
-        
+client.on('messageCreate', message=>{
+    if(message.content==='ping'){
+        message.reply('pong');
     }
 })
+
+client.login(process.env.TOKEN);
