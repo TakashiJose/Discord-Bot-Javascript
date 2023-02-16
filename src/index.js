@@ -1,23 +1,17 @@
 const { Client, GatewayIntentBits} = require('discord.js');
 require('dotenv').config();
+const {Distube} = require("distube");
 
 const client = new Client(
     { intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers
     ] 
 });
 
-client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}!`);
-  });
-  
-  client.on('messageCreate', (message) => {
-    if(message.content === 'ping'){
-        message.reply('pong');
-    }
-  });
-  
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.DISCORD_TOKEN).then(()=>{
+  console.log(`Logged in as ${client.user.tag}!`);
+}).catch((err)=>console.log(err));
