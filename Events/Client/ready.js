@@ -1,7 +1,14 @@
+const {loadCommands} = require("../../Handlers/commandHandler");
+
 module.exports={
     name: "ready",
     once: true,
-    execute(){
+    /**
+     * 
+     * @param {*} client 
+     */
+    execute(client){
         console.log("Client Ready");
+        loadCommands(client);
     }
 }

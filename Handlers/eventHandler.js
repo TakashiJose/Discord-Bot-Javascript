@@ -23,7 +23,7 @@ async function loadEvents(client){
         }
 
         table.addRow(event.name, "1");
-    })
+    }); 
 
     return console.log(table.toString(), "\nLoaded Events");
 }
