@@ -6,9 +6,9 @@ module.exports={
      * 
      * @param {ChatInputCommandInteraction} interaction 
      * @param {*} client 
-     * @returns 
      */
     execute(interaction, client){
+        console.log("SLash Command");
         if(!InteractionCollector.isChatInputCommand()) return;
         const command= client.commands.get(interaction.commandName);
         if(!command) return interaction.reply({

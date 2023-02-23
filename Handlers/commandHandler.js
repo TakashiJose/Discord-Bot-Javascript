@@ -8,18 +8,18 @@ async function loadCommands(client){
 
     const Files= await loadFiles("Commands");
 
-        Files.forEach((file)=>{
-            const command=require(file);
+    Files.forEach((file)=>{
+        const command=require(file);
+
+        if ('data' in command && 'execute' in command){
             client.commands.set(command.data.name,command);
+        }
+        commandsArray.push(command.data.toJSON());
+        table.addRow(command.data.name, "Ready");
+    })
 
-            commandsArray.push(command.data.toJSON());
-
-            table.addRow(command.data.name, "1");
-        })
-
-        client.application.commands.set(commandsArray);
-
-        return console.log(table.toString(), "\nCommands Loaded.")
+    client.application.commands.set(commandsArray);
+    console.log(table.toString(), "\nCommands Loaded.");
 }
 
 module.exports={loadCommands};

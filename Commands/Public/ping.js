@@ -8,7 +8,9 @@ module.exports={
      * 
      * @param {ChatInputCommandInteraction} interaction 
      */
-    async execute(interaction){
-        interaction.reply({content: "Pong!", ephemeral: true});
+    execute(interaction){
+        console.log("working");
+        interaction.reply("HELLO");
+        interaction.editReply('helloo again');
     }
-}
+};

@@ -8,7 +8,8 @@ module.exports={
      * @param {*} client 
      */
     execute(client){
-        console.log("Client Ready");
+        
         loadCommands(client);
+        console.log("Client Ready");
     }
 }

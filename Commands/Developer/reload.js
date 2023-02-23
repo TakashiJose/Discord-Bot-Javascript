@@ -22,7 +22,7 @@ module.exports={
      * @param {ChatInputCommandInteraction} interaction 
      * @param {Client} client 
      */
-    execute(interaction, client){
+    async execute(interaction, client){
         const subCommand = interaction.options.getSubcommand();
 
         switch(subCommand){
@@ -30,7 +30,7 @@ module.exports={
                 for(const [key,value] of client.events)
                     client.removeListener(`${key}`,value,true);
                 loadEvents(client);
-                interaction.reply({content: "Reloaded Events", ephemeral: true});
+                await interaction.reply({content: "Reloaded Events", ephemeral: true});
 
             }
             break;
