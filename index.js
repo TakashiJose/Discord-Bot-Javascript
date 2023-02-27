@@ -8,15 +8,10 @@ const client= new Client({
   partials: [User, Message, GuildMember, ThreadMember],
 });
 
-
-
 //Third Party Packages
 require('dotenv').config();
 const fs= require('node:fs');
 const path= require('node:path');
-
-//Local Packages
-const {loadEvents} = require("./Handlers/eventHandler");
 
 //Clearing Commands/Events
 client.events = new Collection();
@@ -25,6 +20,7 @@ client.commands= new Collection();
 const commandsPath= path.join(__dirname, 'commands');
 const commandFiles=fs.readdirSync(commandsPath).filter(file=>file.endsWith('.js'));
 
+//Find Command Files
 for (const file of commandFiles) {
 	const filePath = path.join(commandsPath, file);
 	const command = require(filePath);
@@ -36,9 +32,28 @@ for (const file of commandFiles) {
 	}
 }
 
-//Loading
-loadEvents(client);
+
+//Deploy Commands
+client.on(Events.InteractionCreate, async interaction =>{
+	if(!interaction.isChatInputCommand())return;
+	const command=interaction.client.commands.get(interaction.commandName);
+	if(!command){
+		console.error(`No command matching ${interaction.commandName} was found.`);
+		return;
+	}
+	try{
+		await command.execute(interaction);
+	}catch(error){
+		console.error(error);
+		if(interaction.replied||interaction.deferred){
+			await interaction.followUp({content:'There was an error while executing this command!', ephemeral: true});
+		}else{
+			await interaction.reply({content: 'There was an error while executing this command!', ephemeral: true});
+		}
+	}
+});
+
 
 //Start Discord
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.DISCORD_TOKEN)
 

@@ -9,7 +9,6 @@ module.exports={
      * @param {ChatInputCommandInteraction} interaction 
      */
     async execute(interaction){
-        console.log("working");
         await interaction.reply("HELLO");
     }
 };
