@@ -1,14 +1,13 @@
-const {loadCommands} = require("../../Handlers/commandHandler");
+const {Events} = require('discord.js');
 
 module.exports={
-    name: "ready",
+    name: Events.ClientReady,
     once: true,
     /**
      * 
      * @param {*} client 
      */
     execute(client){
-        loadCommands(client);
         console.log("Client Ready");
     }
 }
