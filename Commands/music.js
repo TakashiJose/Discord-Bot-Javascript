@@ -1,6 +1,6 @@
-const {SlashCommandBuilder,CommandInteraction, Client, MessageEmbed, Message} = require('discord.js');
+const {SlashCommandBuilder,CommandInteraction, Client, EmbedBuilder, Message} = require('discord.js');
 const { joinVoiceChannel } = require('@discordjs/voice');
-const {DisTube} = require('distube');
+
 
 module.exports={
     data: new SlashCommandBuilder()
@@ -25,40 +25,50 @@ module.exports={
         )
     )
     .addSubcommand(subcommand=>subcommand
-        .setName('settings')
-        .setDescription('Select an option.')
-        .addStringOption(option=>option
-            .setName("options")
-            .setDescription("Select an option.")
-            .setRequired(true)
-            .addChoices(
-                {name: "queue", value: "queue"},
-                {name: "skip", value: "skip"},
-                {name: "pause", value: "pause"},
-                {name: "resume", value: "resume"},
-                {name: "stop", value: "stop"},
-            )
-        )
+        .setName('queue')
+        .setDescription('View queue')
+    )
+    .addSubcommand(subcommand=>subcommand
+        .setName('skip')
+        .setDescription('Skip song')
+    )
+    .addSubcommand(subcommand=>subcommand
+        .setName('pause')
+        .setDescription('Pause song')
+    )
+    .addSubcommand(subcommand=>subcommand
+        .setName('resume')
+        .setDescription('Resume song')
+    )
+    .addSubcommand(subcommand=>subcommand
+        .setName('stop')
+        .setDescription('Stop queue')
     ),
     /**
      * 
-     * @param {CommandInteraction} intearction 
-     * @param {Client} client 
+     * @param {CommandInteraction} interaction 
+     * @param {client} client 
      */
-    async execute(interaction, client){
-        const { options, member, guild, channel, message}=interaction;
+    async execute(interaction){
+        const { options, member, guild, channel}=interaction;
         const VoiceChannel= member.voice.channel;
+        const subcommand=options.getSubcommand();
+        const client= require("../index");
+        const queue = await client.distube.getQueue(VoiceChannel);
+
         if(!VoiceChannel){
             return interaction.reply({content:"You must be in a voice channel", ephemeral: true});
         }
-
+        if(!member.voice.channelId==guild.members.me.voice.channelId){
+            return interaction.reply({content: "Already in use"})
+        }
         try{
-            switch(options.getSubcommand()){
+            switch(subcommand){
                 case "play":{
                     client.distube.play( VoiceChannel, options.getString("query"), {textChannel:channel, member: member});
                     return interaction.reply({content: "Request received."})
                 }
-                case "Volume":{
+                case "volume":{
                     const Volume = options.getNumber("percent");
                     if(Volume>100||Volume<1){
                         return interaction.reply({content: "Invalid volume level", ephemeral: true});
@@ -66,42 +76,55 @@ module.exports={
                     client.distube.setVolume(VoiceChannel, Volume);
                     return interaction.reply({content: `Volume has been set to \`${Volume}\``});
                 }
-                case "Settings":{
-                    const queue = await client.distube.getQueue(VoiceChannel);
+                case "skip":{
                     if(!queue){
                         return interaction.reply({content: "No queue available", ephemeral: true});
                     }
-                    switch(options.getString("options")){
-                        case "skip":{
-                            await queue.skip(VoiceChanneL);
-                            return interaction.reply({content: "Song skipped"});
-                        }
-                        case "pause":{
-                            await queue.pause(VoiceChannel);
-                            return interaction.reply({content: "Song paused"});
-                        }
-                        case "resume":{
-                            await queue.resume(VoiceChannel);
-                            return interaction.reply({content: "Song resumed"});
-                        }
-                        case "stop":{
-                            await queue.stop(VoiceChannel);
-                            return interaction.reply({content: "Song stopped"});
-                        }
-                        case "queue":{
-                            return interaction.reply({
-                                embeds: [new MessageEmbed()
-                                    .setColor("GREEN")
-                                    .setDescription(`${queue.songs.map(
-                                        (song,id)=>`\n**${id+1}**. ${song.name} - \`${song.formattedDuration}\``
-                                    )}`)
-                                ]
-                            });
-                        }
+                    try{
+                        await queue.skip(VoiceChannel);
+                        return interaction.reply({content: "Song skipped"});
                     }
-                    return;
+                    catch(e){
+                        await queue.stop(VoiceChannel)
+                        return interaction.reply({content:"No more songs available"})
+                    }
+
+                }
+                case "pause":{
+                    if(!queue){
+                        return interaction.reply({content: "No queue available", ephemeral: true});
+                    }
+                    await queue.pause(VoiceChannel);
+                    return interaction.reply({content: "Song paused"});
+                }
+                case "resume":{
+                    if(!queue){
+                        return interaction.reply({content: "No queue available", ephemeral: true});
+                    }
+                    await queue.resume(VoiceChannel);
+                    return interaction.reply({content: "Song resumed"});
+                }
+                case "stop":{
+                    if(!queue){
+                        return interaction.reply({content: "No queue available", ephemeral: true});
+                    }
+                    await queue.stop(VoiceChannel);
+                    return interaction.reply({content: "Song stopped"});
+                }
+                case "queue":{
+                    if(!queue){
+                        return interaction.reply({content: "No queue available", ephemeral: true});
+                    }
+                    return interaction.reply({
+                        embeds: [ new EmbedBuilder()
+                            .setDescription(`${queue.songs.map(
+                                (song,id)=>`\n**${id+1}**. ${song.name} - \`${song.formattedDuration}\``
+                            )}`)
+                        ]
+                    });
                 }
             }
+            //check for queue
         }catch(e){
             console.log(e);
             return interaction.reply({content: "error", ephemeral:true});

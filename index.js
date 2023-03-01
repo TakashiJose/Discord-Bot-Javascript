@@ -12,25 +12,30 @@ const {SpotifyPlugin} = require("@distube/spotify");
 
 //Setting client
 const client= new Client({
-	intents: 32767, 
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.GuildVoiceStates,
+		GatewayIntentBits.MessageContent], 
 	partials: [User, Message, GuildMember, ThreadMember],
 });
 
 //Distube setup
-client.distube = new DisTube(client,{
+client.distube = new DisTube(client, {
 	emitNewSongOnly: true,
-	leaveOnFinish: true,
+	leaveOnFinish: false,
 	emitAddSongWhenCreatingQueue: false,
-	plugins: [new SpotifyPlugin()]
+	emitAddListWhenCreatingQueue: false,
+	leaveOnStop: true,
+	plugins: [new SpotifyPlugin()],
 });
+
+module.exports=client;
 
 //Clearing Commands/Events
 client.events = new Collection();
 client.commands= new Collection();
 const rest=new REST({version: '10'}).setToken(process.env.DISCORD_TOKEN);
-
-
-module.exports = client;
 
 //Command Files
 const commandsPath= path.join(__dirname, 'commands');
